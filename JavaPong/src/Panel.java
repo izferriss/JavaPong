@@ -36,7 +36,8 @@ public class Panel extends JPanel implements Runnable
 	
 	public void newBall()
 	{
-		
+		random = new Random();
+		ball = new Ball(((GAME_WIDTH / 2) - (BALL_DIAMETER / 2)), random.nextInt(GAME_HEIGHT - BALL_DIAMETER), BALL_DIAMETER, BALL_DIAMETER);
 	}
 	
 	public void newPaddles()
@@ -57,16 +58,106 @@ public class Panel extends JPanel implements Runnable
 	{
 		paddle1.draw(g);
 		paddle2.draw(g);
+		ball.draw(g);
+		score.draw(g);
 	}
 	
 	public void move()
 	{
-		
+		paddle1.move();
+		paddle2.move();
+		ball.move();
 	}
 	
 	public void checkCollision()
 	{
+		// bounce ball off top and bottom window edges
+		if(ball.y <= 0)
+		{
+			ball.setYDir(-ball.yVel);
+		}
+		if(ball.y >= GAME_HEIGHT - BALL_DIAMETER)
+		{
+			ball.setYDir(-ball.yVel);
+		}
 		
+		// bounces ball off paddles
+		if(ball.intersects(paddle1))
+		{
+			ball.xVel = Math.abs(ball.xVel);
+			
+			// increases difficulty
+			ball.xVel++;
+			
+			if(ball.yVel > 0)
+			{
+				// increases difficulty
+				ball.yVel++;
+			}
+			else
+			{
+				ball.yVel--;
+			}
+			
+			ball.setXDir(ball.xVel);
+			ball.setYDir(ball.yVel);
+		}
+		if(ball.intersects(paddle2))
+		{
+			ball.xVel = Math.abs(ball.xVel);
+			
+			// increases difficulty
+			ball.xVel++;
+			
+			if(ball.yVel > 0)
+			{
+				// increases difficulty
+				ball.yVel++;
+			}
+			else
+			{
+				ball.yVel--;
+			}
+			
+			ball.setXDir(-ball.xVel);
+			ball.setYDir(ball.yVel);
+		}
+		
+		// stops paddles at window edges
+		if(paddle1.y <= 0)
+		{
+			paddle1.y = 0;
+		}
+		if(paddle1.y >= GAME_HEIGHT - PADDLE_HEIGHT)
+		{
+			paddle1.y = GAME_HEIGHT - PADDLE_HEIGHT;
+		}
+		if(paddle2.y <= 0)
+		{
+			paddle2.y = 0;
+		}
+		if(paddle2.y >= GAME_HEIGHT - PADDLE_HEIGHT)
+		{
+			paddle2.y = GAME_HEIGHT - PADDLE_HEIGHT;
+		}
+		
+		// give a player one point and create new paddles and ball
+		if(ball.x <= 0)
+		{
+			// player 2 scored (ball at left boundary)
+			score.player2++;
+			newPaddles();
+			newBall();
+			System.out.println("Player 2: " + score.player2);
+		}
+		if(ball.x >= (GAME_WIDTH - BALL_DIAMETER))
+		{
+			// player 1 scored (ball at right boundary)
+			score.player1++;
+			newPaddles();
+			newBall();
+			System.out.println("Player 1: " + score.player1);
+		}
 	}
 	
 	public void run()
@@ -96,12 +187,14 @@ public class Panel extends JPanel implements Runnable
 	{
 		public void keyPressed(KeyEvent e)
 		{
-			
+			paddle1.keyPressed(e);
+			paddle2.keyPressed(e);
 		}
 		
 		public void keyReleased(KeyEvent e)
 		{
-			
+			paddle1.keyReleased(e);
+			paddle2.keyReleased(e);
 		}
 	}
 }
